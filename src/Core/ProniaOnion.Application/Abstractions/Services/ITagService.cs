@@ -9,12 +9,12 @@ namespace ProniaOnion.Application.Abstractions.Services
 {
     public interface ITagService
     {
-        Task<TagGetDto> CreateTagAsync(TagCreateDto tagDto);
+        Task<TagGetDto> CreateTagAsync(TagPostDto tagDto);
 
         Task DeleteTagAsync(int id);
         Task SoftDeleteTagAsync(int id);
 
-        Task<TagGetDto> UpdateTagAsync(int id, TagUpdateDto tagDto);
+        Task<TagGetDto> UpdateTagAsync(int id, TagPutDto tagDto);
 
         Task<ICollection<TagGetCollectionDto>> SearchTagsAsync(
             string searchTerm,

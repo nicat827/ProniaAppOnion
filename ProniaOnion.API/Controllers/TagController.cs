@@ -44,7 +44,7 @@ namespace ProniaOnion.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromForm] TagCreateDto createTagDto)
+        public async Task<IActionResult> Post([FromForm] TagPostDto createTagDto)
         {
 
             return StatusCode(StatusCodes.Status201Created, await _service.CreateTagAsync(createTagDto));
@@ -69,7 +69,7 @@ namespace ProniaOnion.API.Controllers
 
 
         [HttpPut]
-        public async Task<IActionResult> Put(int id, [FromForm] TagUpdateDto tagDto)
+        public async Task<IActionResult> Put(int id, [FromForm] TagPutDto tagDto)
         {
             if (id <= 0) return BadRequest();
             return Ok(await _service.UpdateTagAsync(id, tagDto));

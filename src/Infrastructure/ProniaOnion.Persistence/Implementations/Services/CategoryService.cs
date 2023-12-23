@@ -23,7 +23,7 @@ namespace ProniaOnion.Persistence.Implementations.Services
             _repository = repository;
             _mapper = mapper;
         }
-        public async Task<CategoryGetDto> CreateCategoryAsync(CategoryCreateDto categoryDto)
+        public async Task<CategoryGetDto> CreateCategoryAsync(CategoryPostDto categoryDto)
         {
 
             Category newCategory = new() { Name = categoryDto.Name };
@@ -133,7 +133,7 @@ namespace ProniaOnion.Persistence.Implementations.Services
         }
 
 
-        public async Task<CategoryGetDto> UpdateCategoryAsync(int id, CategoryUpdateDto categoryDto)
+        public async Task<CategoryGetDto> UpdateCategoryAsync(int id, CategoryPutDto categoryDto)
         {
             Category category = await _repository.GetByIdAsync(id) ?? throw new Exception("Category wasnt found!");
             category.Name = categoryDto.Name;

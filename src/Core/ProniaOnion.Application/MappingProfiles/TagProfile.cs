@@ -13,8 +13,8 @@ namespace ProniaOnion.Application.MappingProfiles
     {
         public TagProfile()
         {
-            CreateMap<TagCreateDto, Tag>();
-            CreateMap<TagUpdateDto, Tag>();
+            CreateMap<TagPostDto, Tag>();
+            CreateMap<TagPutDto, Tag>();
             CreateMap<Tag, TagGetDto>();
             CreateMap<Tag, TagGetCollectionDto>();
         }

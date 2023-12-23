@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ProniaOnion.Application.Validators
 {
-    public class CategoryCreateDtoValidator:AbstractValidator<CategoryCreateDto>
+    public class CategoryCreateDtoValidator:AbstractValidator<CategoryPostDto>
     {
         public CategoryCreateDtoValidator()
         {

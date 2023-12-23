@@ -48,14 +48,14 @@ namespace ProniaOnion.API.Controllers
 
         [HttpPost]
 
-        public async Task<IActionResult> CreateAsync([FromForm] CategoryCreateDto categoryDto)
+        public async Task<IActionResult> CreateAsync([FromForm] CategoryPostDto categoryDto)
         {
 
             return StatusCode(StatusCodes.Status201Created, await _service.CreateCategoryAsync(categoryDto));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAsync(int id,[FromForm]CategoryUpdateDto categoryDto)
+        public async Task<IActionResult> PutAsync(int id,[FromForm]CategoryPutDto categoryDto)
         {
             if (id <= 0) return BadRequest();
 

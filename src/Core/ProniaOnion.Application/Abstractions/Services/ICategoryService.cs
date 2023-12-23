@@ -28,11 +28,11 @@ namespace ProniaOnion.Application.Abstractions.Services
             bool isTracking = false,
             params string[] includes);
 
-        Task<CategoryGetDto> CreateCategoryAsync(CategoryCreateDto categoryDto);
+        Task<CategoryGetDto> CreateCategoryAsync(CategoryPostDto categoryDto);
 
 
 
-        Task<CategoryGetDto> UpdateCategoryAsync(int id, CategoryUpdateDto categoryDto);
+        Task<CategoryGetDto> UpdateCategoryAsync(int id, CategoryPutDto categoryDto);
 
         Task DeleteCategory(int id);
 

@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace ProniaOnion.Application.Dtos.Tag
 {
-    public record TagUpdateDto(string Name);
+    public record TagPutDto(string Name);
     
 }

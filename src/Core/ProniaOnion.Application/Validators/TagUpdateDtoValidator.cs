@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ProniaOnion.Application.Validators
 {
-    public class TagUpdateDtoValidator : AbstractValidator<TagUpdateDto>
+    public class TagUpdateDtoValidator : AbstractValidator<TagPutDto>
     {
         public TagUpdateDtoValidator()
         {

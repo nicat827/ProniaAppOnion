@@ -52,7 +52,7 @@ namespace ProniaOnion.Persistence.Implementations.Services
 
 
 
-        public async Task<TagGetDto> CreateTagAsync(TagCreateDto tagDto)
+        public async Task<TagGetDto> CreateTagAsync(TagPostDto tagDto)
         {
             Tag tag = new Tag { Name = tagDto.Name };
             await _repository.CreateAsync(tag);
@@ -67,7 +67,7 @@ namespace ProniaOnion.Persistence.Implementations.Services
             await _repository.SaveChangesAsync();
         }
 
-        public async Task<TagGetDto> UpdateTagAsync(int id, TagUpdateDto tagDto)
+        public async Task<TagGetDto> UpdateTagAsync(int id, TagPutDto tagDto)
         {
             Tag tag = await _repository.GetByIdAsync(id:id, showDeleted:true) ?? throw new Exception("Tag wasnt found!");
             tag.Name = tagDto.Name;

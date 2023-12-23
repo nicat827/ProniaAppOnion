@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace ProniaOnion.Application.Dtos.Category
 {
-    public record CategoryUpdateDto(string Name);
-    
+    public record CategoryPostDto(string Name);
+   
 }

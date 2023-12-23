@@ -14,8 +14,8 @@ namespace ProniaOnion.Application.MappingProfiles
         public CategoryProfile()
         {
             CreateMap<Category,CategoryGetCollectionDto>();
-            CreateMap<CategoryCreateDto, Category>();
-            CreateMap<CategoryUpdateDto, Category>();
+            CreateMap<CategoryPostDto, Category>();
+            CreateMap<CategoryPutDto, Category>();
             CreateMap<Category, CategoryGetDto>();
         }
     }
