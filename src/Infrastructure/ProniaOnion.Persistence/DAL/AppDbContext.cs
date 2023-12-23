@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProniaOnion.Domain.Entities;
 using ProniaOnion.Domain.Entities.Common;
+using ProniaOnion.Persistence.Common;
 using System.Reflection;
 
 
@@ -26,7 +27,7 @@ namespace ProniaOnion.Persistence.DAL
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-           
+            modelBuilder.ApplyQueryFilters();
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
             
             base.OnModelCreating(modelBuilder);
