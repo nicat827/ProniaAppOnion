@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProniaOnion.Application.Dtos.Category
+namespace ProniaOnion.Application.Dtos
 {
     public record CategoryPutDto(string Name);
     

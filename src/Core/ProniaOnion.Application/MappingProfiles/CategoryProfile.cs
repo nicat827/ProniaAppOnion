@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using ProniaOnion.Application.Dtos.Category;
+using ProniaOnion.Application.Dtos;
 using ProniaOnion.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace ProniaOnion.Application.MappingProfiles
     {
         public CategoryProfile()
         {
-            CreateMap<Category,CategoryGetCollectionDto>();
+            CreateMap<Category,CategoryGetItemDto>();
             CreateMap<CategoryPostDto, Category>();
             CreateMap<CategoryPutDto, Category>();
             CreateMap<Category, CategoryGetDto>();

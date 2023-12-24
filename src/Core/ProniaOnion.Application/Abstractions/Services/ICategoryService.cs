@@ -1,4 +1,4 @@
-﻿using ProniaOnion.Application.Dtos.Category;
+﻿using ProniaOnion.Application.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,23 +9,30 @@ namespace ProniaOnion.Application.Abstractions.Services
 {
     public interface ICategoryService
     {
-        Task<ICollection<CategoryGetCollectionDto>> GetCategoriesAsync(int? page = null, int? limit = null, bool isTracking = false, bool showDeleted = false, params string[] includes);
+        Task<IEnumerable<CategoryGetItemDto>> GetCategoriesAsync(
+            int? page = null,
+            int? limit = null,
+            bool isTracking = false,
+            bool showDeleted = false,
+            params string[] includes);
 
-        Task<ICollection<CategoryGetCollectionDto>> GetOrderedCategoriesAsync(
+        Task<IEnumerable<CategoryGetItemDto>> GetOrderedCategoriesAsync(
             string orderBy,
             int? page = null,
             int? limit = null,
             bool isDescending = false,
             bool isTracking = false,
+            bool showDeleted = false,
             params string[] includes);
-        //Task<ICollection<GetCategoryDto>> GetFilteredCategoriesAsync(string name, int? page, int? limit, bool isTracking= false);
+       
         Task<CategoryGetDto> GetCategoryByIdAsync(int id, bool isTracking = false, bool showDeleted = false, params string[] includes);
 
-        Task<ICollection<CategoryGetCollectionDto>> SearchCategoriesAsync(
+        Task<IEnumerable<CategoryGetItemDto>> SearchCategoriesAsync(
             string searchTerm,
             int? page = null,
             int? limit = null,
             bool isTracking = false,
+            bool showDeleted = false,
             params string[] includes);
 
         Task<CategoryGetDto> CreateCategoryAsync(CategoryPostDto categoryDto);
@@ -34,8 +41,11 @@ namespace ProniaOnion.Application.Abstractions.Services
 
         Task<CategoryGetDto> UpdateCategoryAsync(int id, CategoryPutDto categoryDto);
 
-        Task DeleteCategory(int id);
 
         Task SoftDeleteCategoryAsync(int id);
+        Task RevertSoftDeleteCategoryAsync(int id);
+
+        Task DeleteCategoryAsync(int id);
+
     }
 }

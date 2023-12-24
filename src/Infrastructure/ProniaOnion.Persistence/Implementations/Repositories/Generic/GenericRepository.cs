@@ -21,107 +21,114 @@ namespace ProniaOnion.Persistence.Implementations.Repositories.Generic
         {
             await _table.AddAsync(entity);
         }
-
-        public void Delete(T entity)
-        {
-            _table.Remove(entity);
-        }
-
-        public IQueryable<T> FilterAndGet(int skip, int limit, Expression<Func<T, bool>> expression, bool isTracking = false)
+        public IQueryable<T> GetAll(
+            int? skip = null,
+            int? limit = null,
+            bool isTracking = false,
+            bool showDeleted = false,
+            params string[] includes)
         {
             IQueryable<T> query = _table;
+            if (showDeleted) query = query.IgnoreQueryFilters();
+
+            if (skip != null) query = query.Skip((int)skip);
+            if (limit != null) query = query.Take((int)limit);
+
+            if (includes != null) query = _takeIncludes(query, includes);
+
+            return isTracking ? query : query.AsNoTracking();
+        }
+        public IQueryable<T> SearchAndGet(
+            Expression<Func<T, bool>> expression,
+            int? skip = null,
+            int? limit = null,
+            bool isTracking = false,
+            bool showDeleted = false,
+            params string[] includes)
+        {
+            IQueryable<T> query = _table;
+            if (showDeleted) query = query.IgnoreQueryFilters();
             query = query.Where(expression);
-            if (skip != 0) query = query.Skip(skip);
-            if (limit != 0) query = query.Take(limit);
-            return isTracking ? query : query.AsNoTracking();
+            if (skip != null) query = query.Skip((int)skip);
+            if (limit != null) query = query.Take((int)limit);
+
+            if (includes != null) query = _takeIncludes(query, includes);
+            return query;
         }
 
-        public async Task<T> Get(Expression<Func<T, bool>> expression, bool isTracking = false, bool showDeleted = false, params string[] includes)
-        {
-            IQueryable<T> query = _table.Where(expression);
-            if (showDeleted) query = query.IgnoreQueryFilters();
-            if (includes != null)
-            {
-                query = TakeIncludes(query, includes);
-            }
-            return isTracking ? await query.FirstOrDefaultAsync() : await query.AsNoTracking().FirstOrDefaultAsync();
-        }
 
-        public IQueryable<T> GetAll(int skip = 0, int limit = 0, bool isTracking = false, bool showDeleted = false, params string[] includes)
-        {
-            IQueryable<T> query = _table;
 
-            if (skip != 0) query = query.Skip(skip);
-            if (limit != 0) query = query.Take(limit);
-            if (showDeleted) query = query.IgnoreQueryFilters();
-
-            if (includes != null)
-            {
-                query = TakeIncludes(query, includes);
-            }
-
-            return isTracking ? query : query.AsNoTracking();
-        }
-
-        public async Task<T> GetByIdAsync(int id, bool isTracking = false, bool showDeleted = false, params string[] includes)
-        {
-            IQueryable<T> query = _table;
-            query = query.Where(e => e.Id == id);
-            if (showDeleted) query = query.IgnoreQueryFilters();
-
-            if (includes != null)
-            {
-                query = TakeIncludes(query, includes);
-            }
-            return isTracking ? await query.FirstOrDefaultAsync() : await query.AsNoTracking().FirstOrDefaultAsync();
-        }
-
-        public IQueryable<T> OrderAndGet(Expression<Func<T, object>> order, bool isDescending, int skip = 0, int limit = 0, bool isTracking = false, bool showDeleted = false, params string[] includes)
+        public IQueryable<T> OrderAndGet(
+            Expression<Func<T, object>> order,
+            bool isDescending,
+            int? skip = null,
+            int? limit = null,
+            bool isTracking = false,
+            bool showDeleted = false,
+            params string[] includes)
         {
             IQueryable<T> query = _table;
             if (showDeleted) query = query.IgnoreQueryFilters();
 
             if (!isDescending) query = query.OrderBy(order);
             else query = query.OrderByDescending(order);
-            if (skip != 0) query = query.Skip(skip);
-            if (limit != 0) query = query.Take(limit);
+
+            if (skip != null) query = query.Skip((int)skip);
+            if (limit != null) query = query.Take((int)limit);
+                
+            if (includes != null) query = _takeIncludes(query, includes);
+
+            return isTracking ? query : query.AsNoTracking();
+        }
+        public async Task<T> GetByIdAsync(int id, bool isTracking = false, bool showDeleted = false, params string[] includes)
+        {
+            IQueryable<T> query = _table;
+            if (showDeleted) query = query.IgnoreQueryFilters();
+            query = query.Where(e => e.Id == id);
+
             if (includes != null)
             {
-                query = TakeIncludes(query, includes);
+                query = _takeIncludes(query, includes);
             }
-            return isTracking ? query : query.AsNoTracking();
+            return isTracking ? await query.FirstOrDefaultAsync() : await query.AsNoTracking().FirstOrDefaultAsync();
+        }
+        public async Task<T> Get(Expression<Func<T, bool>> expression, bool isTracking = false, bool showDeleted = false, params string[] includes)
+        {
+            IQueryable<T> query = _table;
+            if (showDeleted) query = query.IgnoreQueryFilters();
+            query = query.Where(expression);
+            if (includes != null) query = _takeIncludes(query, includes);
+
+            return isTracking ? await query.FirstOrDefaultAsync() : await query.AsNoTracking().FirstOrDefaultAsync();
+        }
+        public void Update(T entity)
+        {
+            _table.Update(entity);
+        }
+        public void SoftDelete(T entity)
+        {
+            entity.IsDeleted = true;
+        }
+        public void RevertSoftDelete(T entity)
+        {
+            entity.IsDeleted = false;
+        }
+        public void Delete(T entity)
+        {
+            _table.Remove(entity);
         }
 
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
         }
-
-        public IQueryable<T> SearchAndGet(
-            Expression<Func<T, bool>> expression,
-            int skip = 0,
-            int limit = 0,
-            bool isTracking = false,
-            params string[] includes)
+        public async Task<bool> IsExistEntityAsync(Expression<Func<T, bool>> expression)
         {
-            IQueryable<T> query = _table;
-
-            query = query.Where(expression);
-            if (skip != 0) query = query.Skip(skip);
-            if (limit != 0) query = query.Take(limit);
-            if (includes != null)
-            {
-                query = TakeIncludes(query, includes);
-            }
-            return query;
+            return await _table.AnyAsync(expression);
         }
 
-        public void Update(T entity)
-        {
-            _table.Update(entity);
-        }
 
-        public IQueryable<T> TakeIncludes(IQueryable<T> query, params string[] includes)
+        private IQueryable<T> _takeIncludes(IQueryable<T> query, params string[] includes)
         {
             for (int i = 0; i < includes.Length; i++)
             {
@@ -131,10 +138,5 @@ namespace ProniaOnion.Persistence.Implementations.Repositories.Generic
             return query;
         }
 
-        public void SoftDelete(T entity)
-        {
-            
-            Update(entity);
-        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿
 using FluentValidation;
-using ProniaOnion.Application.Dtos.Tag;
+using ProniaOnion.Application.Dtos;
 
 namespace ProniaOnion.Application.Validators
 {

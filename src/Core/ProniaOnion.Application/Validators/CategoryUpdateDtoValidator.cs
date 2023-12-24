@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using ProniaOnion.Application.Dtos.Category;
+using ProniaOnion.Application.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;

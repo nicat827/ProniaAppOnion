@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProniaOnion.Application.Abstractions.Repositories;
 using ProniaOnion.Application.Abstractions.Services;
-using ProniaOnion.Application.Dtos.Tag;
+using ProniaOnion.Application.Dtos;
 using ProniaOnion.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,7 @@ namespace ProniaOnion.Persistence.Implementations.Services
 {
     internal class TagService : ITagService
     {
+        private const int LIMIT = 5;
         private readonly ITagRepository _repository;
         private readonly IMapper _mapper;
 
@@ -23,111 +24,134 @@ namespace ProniaOnion.Persistence.Implementations.Services
             _repository = repository;
             _mapper = mapper;
         }
-        public async Task<ICollection<TagGetCollectionDto>> GetAllTagsAsync(int? page = null, int? limit = null, bool isTracking = false, bool showDeleted = false, params string[] includes)
-        {
-            ICollection<Tag> tags = new List<Tag>();
-            if (page == null)
-            {
-                if (limit == null) tags = await _repository.GetAll(isTracking: isTracking, includes: includes).ToListAsync();
-                else tags = await _repository.GetAll(limit: (int)limit, isTracking: isTracking, includes: includes).ToListAsync();
-            }
-            else
-            {
-                limit ??= 5;
-                tags = await _repository.GetAll((int)((page - 1) * limit), (int)limit, isTracking,false, includes).ToListAsync();
-            }
-
-            return _mapper.Map<ICollection<TagGetCollectionDto>>(tags);
-
-
-        }
-
-        public async Task<TagGetDto> GetTagByIdAsync(int id, bool isTracking = false,bool showDeleted=false, params string[] includes)
-        {
-            Tag tag = await _repository.GetByIdAsync(id, isTracking,showDeleted, includes) ?? throw new Exception("Tag wasnt found!");
-            return _mapper.Map<TagGetDto>(tag);
-
-
-        }
-
-
-
         public async Task<TagGetDto> CreateTagAsync(TagPostDto tagDto)
         {
-            Tag tag = new Tag { Name = tagDto.Name };
-            await _repository.CreateAsync(tag);
+
+            Tag newTag = _mapper.Map<Tag>(tagDto);
+            await _repository.CreateAsync(newTag);
             await _repository.SaveChangesAsync();
-            return _mapper.Map<TagGetDto>(tag);
+            return _mapper.Map<TagGetDto>(newTag);
         }
 
-        public async Task DeleteTagAsync(int id)
+
+        public async Task<IEnumerable<TagGetItemDto>> GetTagsAsync(
+            int? page = null,
+            int? limit = null,
+            bool isTracking = false,
+            bool showDeleted = false,
+            params string[] includes
+        )
         {
-            Tag tag = await _repository.GetByIdAsync(id, showDeleted:true) ?? throw new Exception("Tag wasnt found!");
-            _repository.Delete(tag);
-            await _repository.SaveChangesAsync();
+            int? skip = _getSkip(page, limit);
+            IEnumerable<Tag> tags = await _repository.GetAll(
+                 skip,
+                 limit is null && page is not null ? LIMIT : limit,
+                 isTracking,
+                 showDeleted,
+                 includes).ToListAsync();
+
+            return _mapper.Map<IEnumerable<TagGetItemDto>>(tags);
         }
 
-        public async Task<TagGetDto> UpdateTagAsync(int id, TagPutDto tagDto)
+
+        public async Task<IEnumerable<TagGetItemDto>> GetOrderedTagsAsync(
+            string orderBy,
+            int? page = null,
+            int? limit = null,
+            bool isDescending = false,
+            bool isTracking = false,
+            bool showDeleted = false,
+            params string[] includes)
         {
-            Tag tag = await _repository.GetByIdAsync(id:id, showDeleted:true) ?? throw new Exception("Tag wasnt found!");
-            tag.Name = tagDto.Name;
-            _repository.Update(tag);
-            await _repository.SaveChangesAsync();
-            return _mapper.Map<TagGetDto>(tag);
-        }
-        public async Task<ICollection<TagGetCollectionDto>> GetOrderedTagsAsync(
-           string orderBy,
-           int? page = null,
-           int? limit = null,
-           bool isDescending = false,
-           bool isTracking = false,
-           params string[] includes)
-        {
-            Expression<Func<Tag, object>>? expression = GetOrderExpression(orderBy)
+            Expression<Func<Tag, object>>? expression = _getOrderExpression(orderBy)
                 ?? throw new Exception("bad request");
-            ICollection<Tag> tags = new List<Tag>();
+            int? skip = _getSkip(page, limit);
+            IEnumerable<Tag> tags = await _repository.OrderAndGet(
+                expression,
+                isDescending,
+                skip,
+                limit is null && page is not null ? LIMIT : limit,
+                isTracking,
+                showDeleted,
+                includes).ToListAsync();
 
-            if (page == null)
-            {
-                if (limit == null) tags = await _repository.OrderAndGet(order: expression, isDescending: isDescending, isTracking: isTracking, includes: includes).ToListAsync();
-                else tags = await _repository.OrderAndGet(order: expression, isDescending: isDescending, limit: (int)limit, isTracking: isTracking, includes: includes).ToListAsync();
-            }
-            else
-            {
-                if (limit == null) limit = 5;
-                tags = await _repository.OrderAndGet(order: expression, isDescending: isDescending, skip: (int)((page - 1) * limit), (int)limit, isTracking,false, includes).ToListAsync();
-
-            }
-
-            return _mapper.Map<ICollection<TagGetCollectionDto>>(tags);
+            return _mapper.Map<ICollection<TagGetItemDto>>(tags);
         }
-
-        public async Task<ICollection<TagGetCollectionDto>> SearchTagsAsync(
+        public async Task<IEnumerable<TagGetItemDto>> SearchTagsAsync(
             string searchTerm,
             int? page = null,
             int? limit = null,
             bool isTracking = false,
+            bool showDeleted = false,
             params string[] includes)
         {
-            ICollection<Tag> tags = new List<Tag>();
-            Expression<Func<Tag, bool>> expression = t => t.Name.ToLower().Contains(searchTerm.ToLower());
-            if (page == null)
-            {
-                if (limit == null) tags = await _repository.SearchAndGet(expression: expression, isTracking: isTracking, includes: includes).ToListAsync();
-                else tags = await _repository.SearchAndGet(expression: expression, limit: (int)limit, isTracking: isTracking, includes: includes).ToListAsync();
-            }
-            else
-            {
-                limit ??= 5;
-                tags = await _repository.SearchAndGet(expression: expression, skip: (int)((page - 1) * limit), (int)limit, isTracking, includes).ToListAsync();
 
-            }
+            Expression<Func<Tag, bool>> expression = c => c.Name.ToLower().Contains(searchTerm.ToLower());
+            int? skip = _getSkip(page, limit);
+            IEnumerable<Tag> tags = await _repository.SearchAndGet(
+                expression,
+                skip,
+                limit is null && page is not null ? LIMIT : limit,
+                isTracking,
+                showDeleted,
+                includes).ToListAsync();
 
-            return _mapper.Map<ICollection<TagGetCollectionDto>>(tags);
+            return _mapper.Map<ICollection<TagGetItemDto>>(tags);
+
         }
 
+        public async Task<TagGetDto> GetTagByIdAsync(
+            int id,
+            bool isTracking = false,
+            bool showDeleted = false,
+            params string[] includes)
+        {
+            Tag Tag = await _repository.GetByIdAsync(id, isTracking, showDeleted, includes)
+                ?? throw new Exception("Tag wasnt found!");
+            return _mapper.Map<TagGetDto>(Tag);
+
+
+        }
+
+        public async Task<TagGetDto> UpdateTagAsync(int id, TagPutDto TagDto)
+        {
+            Tag Tag = await _repository.GetByIdAsync(id, true) ?? throw new Exception("Tag wasnt found!");
+            Tag.Name = TagDto.Name;
+            await _repository.SaveChangesAsync();
+            return _mapper.Map<TagGetDto>(Tag);
+
+        }
+        public async Task SoftDeleteTagAsync(int id)
+        {
+            Tag tag = await _repository.GetByIdAsync(id, true) ?? throw new Exception("Tag wasnt found!");
+            if (!tag.IsDeleted)
+            {
+                _repository.SoftDelete(tag);
+                await _repository.SaveChangesAsync();
+            }
+
+        }
+
+        public async Task RevertSoftDeleteTagAsync(int id)
+        {
+            Tag tag = await _repository.GetByIdAsync(id, true, true) ?? throw new Exception("Tag wasnt found!");
+            if (!tag.IsDeleted)
+            {
+                _repository.RevertSoftDelete(tag);
+                await _repository.SaveChangesAsync();
+            }
+
+        }
+        public async Task DeleteTagAsync(int id)
+        {
+            Tag Tag = await _repository.GetByIdAsync(id, showDeleted: true) ?? throw new Exception("Tag wasnt found!");
+            _repository.Delete(Tag);
+            await _repository.SaveChangesAsync();
+        }
+
+
         // get expression for order method
-        public Expression<Func<Tag, object>> GetOrderExpression(string orderBy)
+        private Expression<Func<Tag, object>> _getOrderExpression(string orderBy)
         {
             Expression<Func<Tag, object>>? expression = null;
             switch (orderBy.ToLower())
@@ -143,16 +167,16 @@ namespace ProniaOnion.Persistence.Implementations.Services
             return expression;
         }
 
-        public async Task SoftDeleteTagAsync(int id)
+        private int? _getSkip(int? page, int? limit)
         {
-            Tag tag = await _repository.GetByIdAsync(id) ?? throw new Exception("Tag wasnt found!");
-            if (!tag.IsDeleted)
+            int? skip = null;
+            if (page > 0)
             {
-                tag.IsDeleted = true;
-                _repository.SoftDelete(tag);
-                await _repository.SaveChangesAsync();
+
+                if (limit is not null) skip = ((page - 1) * limit);
+                else skip = ((page - 1) * LIMIT);
             }
-            
+            return skip;
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProniaOnion.Application.Abstractions.Services;
-using ProniaOnion.Application.Dtos.Category;
+using ProniaOnion.Application.Dtos;
 
 namespace ProniaOnion.API.Controllers
 {
@@ -14,6 +14,13 @@ namespace ProniaOnion.API.Controllers
         public CategoriesController(ICategoryService service)
         {
             _service = service;
+        }
+        [HttpPost]
+
+        public async Task<IActionResult> CreateAsync([FromForm] CategoryPostDto categoryDto)
+        {
+
+            return StatusCode(StatusCodes.Status201Created, await _service.CreateCategoryAsync(categoryDto));
         }
 
         [HttpGet]
@@ -46,13 +53,6 @@ namespace ProniaOnion.API.Controllers
             return Ok(await _service.GetCategoryByIdAsync(id));
         }
 
-        [HttpPost]
-
-        public async Task<IActionResult> CreateAsync([FromForm] CategoryPostDto categoryDto)
-        {
-
-            return StatusCode(StatusCodes.Status201Created, await _service.CreateCategoryAsync(categoryDto));
-        }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAsync(int id,[FromForm]CategoryPutDto categoryDto)
@@ -63,22 +63,29 @@ namespace ProniaOnion.API.Controllers
         }
 
 
-        [HttpDelete("{id}")]
 
-        public async Task<IActionResult> DeleteAsync(int id)
-        {
-            if (id <= 0) return NotFound();
-            await _service.DeleteCategory(id);
-            return NoContent();
-
-        }
-
-        [HttpPut("api/[controller]/softDelete/{id}")]
+        [HttpPut("softDelete/{id}")]
         public async Task<IActionResult> SoftDelete(int id)
         {
             if (id <= 0) return BadRequest();
             await _service.SoftDeleteCategoryAsync(id);
             return NoContent();
+        }
+        [HttpPut("revertSoftDelete/{id}")]
+        public async Task<IActionResult> RevertSoftDelete(int id)
+        {
+            if (id <= 0) return BadRequest();
+            await _service.RevertSoftDeleteCategoryAsync(id);
+            return NoContent();
+        }
+        [HttpDelete("{id}")]
+
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            if (id <= 0) return NotFound();
+            await _service.DeleteCategoryAsync(id);
+            return NoContent();
+
         }
 
     }

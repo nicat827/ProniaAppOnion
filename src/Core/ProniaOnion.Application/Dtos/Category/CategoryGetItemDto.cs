@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProniaOnion.Application.Dtos.Tag
+namespace ProniaOnion.Application.Dtos
 {
-    public record TagGetCollectionDto(int Id, string Name);
+    public record CategoryGetItemDto(int Id, string Name);
+    
 }

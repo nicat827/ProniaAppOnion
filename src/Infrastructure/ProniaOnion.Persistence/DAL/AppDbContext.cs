@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace ProniaOnion.Persistence.DAL
 {
-    internal class AppDbContext:DbContext
+    public class AppDbContext:DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> opt) : base(opt)
         {
