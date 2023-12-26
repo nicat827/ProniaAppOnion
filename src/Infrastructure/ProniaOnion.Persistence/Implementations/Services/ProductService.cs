@@ -38,10 +38,11 @@ namespace ProniaOnion.Persistence.Implementations.Services
         }
         public async Task CreateProductAsync(ProductPostDto productDto)
         {
-
+            if (await _repository.IsExistEntityAsync(p => p.Name == productDto.Name))
+                throw new Exception("Product already exist!");
+            if (!await _categoryRepository.IsExistEntityAsync(c => c.Id == productDto.CategoryId))
+                 throw new Exception($"Category with {productDto.CategoryId} wasnt defined!");
             Product newProduct = _mapper.Map<Product>(productDto);
-            Category category = await _categoryRepository.GetByIdAsync(productDto.CategoryId)
-                ?? throw new Exception($"Category with {productDto.CategoryId} wasnt defined!");
             newProduct.SKU = Guid.NewGuid().ToString().Substring(10);
             if (productDto.TagIds is not null)
             {
@@ -143,11 +144,7 @@ namespace ProniaOnion.Persistence.Implementations.Services
             Product product = await _repository.GetByIdAsync(id, isTracking, showDeleted, includes)
                 ?? throw new Exception("Product wasnt found!");
             ProductGetDto dto = _mapper.Map<ProductGetDto>(product);
-            foreach (ProductTag pt in product.ProductTags)
-            {
-                dto.Tags.Add(_mapper.Map<TagGetItemDto>(pt.Tag));
-            }
-            dto.Category = _mapper.Map<CategoryGetDto>(product.Category);
+            dto.Tags = _mapper.Map<ICollection<TagGetItemDto>>(product.ProductTags.Select(pt => pt.Tag).ToList());
             return dto;
 
 
@@ -155,12 +152,20 @@ namespace ProniaOnion.Persistence.Implementations.Services
 
         public async Task UpdateProductAsync(int id, ProductPutDto productDto)
         {
-            string[] includes = { "ProductTags", "ProductTags.Tag" };
-            Product product = await _repository.GetByIdAsync(id, isTracking:true, includes:includes) 
+            
+            Product product = await _repository.GetByIdAsync(id, isTracking:true, includes:nameof(Product.ProductTags)) 
                 ?? throw new Exception("Product wasnt found!");
-            Category category = await _categoryRepository.GetByIdAsync(productDto.CategoryId)
-                ?? throw new Exception($"Category with id {productDto.CategoryId} wasnt found!");
-
+            if (product.Name != productDto.Name)
+            {
+                if (await _repository.IsExistEntityAsync(c => c.Name == productDto.Name))
+                    throw new Exception($"Product already exist!");
+            }
+            if (product.CategoryId != productDto.CategoryId)
+            {
+                if (!await _categoryRepository.IsExistEntityAsync(c => c.Id == productDto.CategoryId))
+                    throw new Exception($"Category with id {productDto.CategoryId} wasnt found!");
+            }
+            product = _mapper.Map(productDto, product);
 
             if (productDto.TagIds is not null)
             {
@@ -184,40 +189,35 @@ namespace ProniaOnion.Persistence.Implementations.Services
             }
             else product.ProductTags = new List<ProductTag>();
 
-            product.Name = productDto.Name;
-            product.Description = productDto.Description;
-            product.Price = productDto.Price;
-            product.CategoryId = product.CategoryId;
 
             await _repository.SaveChangesAsync();
-            //ICollection<ProductTag> productTags = new List<ProductTag>();
-            //if (productDto.TagIds is not null)
-            //{
-            //    foreach (int tagId in productDto.TagIds)
-            //    {
-            //        Tag tag = await _tagRepository.GetByIdAsync(tagId) 
-            //            ?? throw new Exception($"Tag with {tagId} wasnt found!");
-            //        productTags.Add(new ProductTag { TagId = tagId });
-            //    }
-            //}
-            //product.ProductTags = productTags;
+        
 
         }
         public async Task SoftDeleteProductAsync(int id)
         {
-            Product product = await _repository.GetByIdAsync(id, true) ?? throw new Exception("Product wasnt found!");
+            string[] includes = { nameof(Product.ProductColors), nameof(Product.ProductTags) }; 
+            Product product = await _repository.GetByIdAsync(id, true, includes:includes)
+                ?? throw new Exception("Product wasnt found!");
             if (!product.IsDeleted)
             {
                 product.IsDeleted = true;
+
+                foreach (ProductTag pt in product.ProductTags) pt.IsDeleted = true;
+                foreach (ProductColor pc in product.ProductColors) pc.IsDeleted = true;
                 await _repository.SaveChangesAsync();
             }
 
         }
         public async Task RevertSoftDeleteProductAsync(int id)
         {
-            Product product = await _repository.GetByIdAsync(id, true, true) ?? throw new Exception("Product wasnt found!");
+            string[] includes = { nameof(Product.ProductColors), nameof(Product.ProductTags) };
+
+            Product product = await _repository.GetByIdAsync(id, true, true, includes:includes) ?? throw new Exception("Product wasnt found!");
             if (product.IsDeleted)
             {
+                foreach (ProductTag pt in product.ProductTags) pt.IsDeleted = false;
+                foreach (ProductColor pc in product.ProductColors) pc.IsDeleted = false;
                 product.IsDeleted = false;
                 await _repository.SaveChangesAsync();
             }

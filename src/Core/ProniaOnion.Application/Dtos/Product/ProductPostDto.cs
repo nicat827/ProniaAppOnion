@@ -10,8 +10,8 @@ namespace ProniaOnion.Application.Dtos
         string Name,   
         decimal Price,
         int CategoryId,
-        string? Description = null,
-        IEnumerable<int>? TagIds = null,
-        IEnumerable<int>? ColorIds = null);
+        string? Description,
+        IEnumerable<int>? TagIds,
+        IEnumerable<int>? ColorIds);
     
 }

@@ -4,7 +4,7 @@ using ProniaOnion.Application.Dtos;
 
 namespace ProniaOnion.Application.Validators
 {
-    public class TagUpdateDtoValidator : AbstractValidator<TagPutDto>
+    public class TagUpdateDtoValidator : AbstractValidator<TagPostDto>
     {
         public TagUpdateDtoValidator()
         {

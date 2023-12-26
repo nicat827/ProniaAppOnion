@@ -15,8 +15,8 @@ namespace ProniaOnion.Domain.Entities
         public string? Description { get; set; }
 
         //relational props
-        public int CategoryId { get; set; }
-        public Category Category { get; set; } = null!;
+        public int? CategoryId { get; set; }
+        public Category? Category { get; set; }
 
         public ICollection<ProductColor> ProductColors { get; set; } = new List<ProductColor>();
 

@@ -17,6 +17,7 @@ namespace ProniaOnion.Application.MappingProfiles
             CreateMap<TagPutDto, Tag>();
             CreateMap<Tag, TagGetDto>();
             CreateMap<Tag, TagGetItemDto>();
+
         }
     }
 }

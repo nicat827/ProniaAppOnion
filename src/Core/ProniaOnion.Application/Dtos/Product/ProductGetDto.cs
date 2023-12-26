@@ -13,7 +13,7 @@ namespace ProniaOnion.Application.Dtos
         public  CategoryGetDto Category { get; set; } = null!;
         public decimal Price {get; set;}
         public string SKU { get; set; } = null!;
-        public string? Description{get; set;}  = null;
+        public string? Description {get; set;}  = null;
         public ICollection<TagGetItemDto> Tags {get; set;} = new List<TagGetItemDto>();
         public ICollection<string> ColorNames { get; set; } = new List<string>();
     } 
