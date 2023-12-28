@@ -1,5 +1,6 @@
 ﻿using ProniaOnion.Application.Dtos;
 using ProniaOnion.Application.Dtos.AppUser;
+using ProniaOnion.Application.Dtos.Token;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace ProniaOnion.Application.Abstractions.Services
     public interface IAuthService
     {
         Task Register(RegisterDto dto);
-        Task Login(LoginDto dto);
+        Task<ResponseTokenDto> Login(LoginDto dto);
 
         Task<IEnumerable<AppUserGetItemDto>> GetAllUsers(
             int? page = null,

@@ -4,9 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using ProniaOnion.Application.Abstractions.Services;
 using ProniaOnion.Application.Dtos;
 using ProniaOnion.Application.Dtos.AppUser;
+using ProniaOnion.Application.Dtos.Token;
 using ProniaOnion.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,11 +19,13 @@ namespace ProniaOnion.Persistence.Implementations.Services
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly ITokenService _tokenService;
 
-        public AuthService(UserManager<AppUser> userManager, IMapper mapper)
+        public AuthService(UserManager<AppUser> userManager, IMapper mapper, ITokenService tokenService)
         {
             _userManager = userManager;
             _mapper = mapper;
+            _tokenService = tokenService;
         }
         public async Task Register(RegisterDto dto)
         {
@@ -39,13 +43,14 @@ namespace ProniaOnion.Persistence.Implementations.Services
                 throw new Exception(sb.ToString());
             }
         }
-        public async Task Login(LoginDto dto)
+        public async Task<ResponseTokenDto> Login(LoginDto dto)
         {
             AppUser user = await _userManager.FindByNameAsync(dto.UserNameOrEmail);
             user ??= await _userManager.FindByEmailAsync(dto.UserNameOrEmail) 
                     ?? throw new Exception("Username, Email or Password is incorrect!");
             if (!await _userManager.CheckPasswordAsync(user, dto.Password)) 
                 throw new Exception("Username, Email or Password is incorrect!");
+            return _tokenService.CreateToken(user,60);
         }
 
         public async Task<IEnumerable<AppUserGetItemDto>> GetAllUsers(

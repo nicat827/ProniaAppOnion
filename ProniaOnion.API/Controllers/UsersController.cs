@@ -27,8 +27,8 @@ namespace ProniaOnion.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Post([FromForm]LoginDto loginDto)
         {
-            await _service.Login(loginDto);
-            return Ok();
+            
+            return Ok(await _service.Login(loginDto));
         }
 
         [HttpGet]
