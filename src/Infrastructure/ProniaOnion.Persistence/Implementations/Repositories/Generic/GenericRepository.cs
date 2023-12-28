@@ -124,7 +124,9 @@ namespace ProniaOnion.Persistence.Implementations.Repositories.Generic
         }
         public async Task<bool> IsExistEntityAsync(Expression<Func<T, bool>> expression)
         {
-            return await _table.AnyAsync(expression);
+            IQueryable<T> query = _table;
+            query = query.IgnoreQueryFilters();
+            return await query.AnyAsync(expression);
         }
 
 

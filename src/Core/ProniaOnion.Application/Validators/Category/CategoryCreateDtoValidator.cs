@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProniaOnion.Application.Validators
+namespace ProniaOnion.Application.Validators.Category
 {
-    public class CategoryCreateDtoValidator:AbstractValidator<CategoryPostDto>
+    public class CategoryCreateDtoValidator : AbstractValidator<CategoryPostDto>
     {
         public CategoryCreateDtoValidator()
         {

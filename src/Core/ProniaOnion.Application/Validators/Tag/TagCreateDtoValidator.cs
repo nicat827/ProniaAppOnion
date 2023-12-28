@@ -2,9 +2,9 @@
 using FluentValidation;
 using ProniaOnion.Application.Dtos;
 
-namespace ProniaOnion.Application.Validators
+namespace ProniaOnion.Application.Validators.Tag
 {
-    public class TagCreateDtoValidator:AbstractValidator<TagPostDto>
+    public class TagCreateDtoValidator : AbstractValidator<TagPostDto>
     {
         public TagCreateDtoValidator()
         {

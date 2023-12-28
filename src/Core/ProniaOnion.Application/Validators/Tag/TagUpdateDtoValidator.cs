@@ -2,7 +2,7 @@
 using ProniaOnion.Application.Dtos;
 
 
-namespace ProniaOnion.Application.Validators
+namespace ProniaOnion.Application.Validators.Tag
 {
     public class TagUpdateDtoValidator : AbstractValidator<TagPostDto>
     {

@@ -26,7 +26,7 @@ namespace ProniaOnion.Persistence.Implementations.Services
         }
         public async Task<TagGetDto> CreateTagAsync(TagPostDto tagDto)
         {
-
+            if (!await _repository.IsExistEntityAsync(t => t.Name == tagDto.Name)) throw new Exception("Tag with this name already exist!");
             Tag newTag = _mapper.Map<Tag>(tagDto);
             await _repository.CreateAsync(newTag);
             await _repository.SaveChangesAsync();
