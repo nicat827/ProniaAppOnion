@@ -9,7 +9,8 @@ namespace ProniaOnion.Domain.Entities
         public string Name { get; set; } = null!;
         public string Surname { get; set; } = null!;
 
-
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiresAt { get; set; }
         public Gender Gender { get; set; }
 
         public bool IsActive { get; set; }

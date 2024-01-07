@@ -10,6 +10,6 @@ namespace ProniaOnion.Application.Abstractions.Services
 {
     public interface ITokenService
     {
-        ResponseTokenDto CreateToken(AppUser user, int minutes);
+        Task<ResponseTokenDto> GenerateTokensAsync(AppUser user, int minutes);
     }
 }

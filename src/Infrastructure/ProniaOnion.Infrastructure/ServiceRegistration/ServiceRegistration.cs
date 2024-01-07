@@ -17,30 +17,30 @@ namespace ProniaOnion.Infrastructure.ServiceRegistration
         public static void AddInfrastructureServices(this IServiceCollection services,  IConfiguration configuration)
         {
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-            })
-            .AddJwtBearer(opt =>
+            }).AddJwtBearer(opt =>
             {
                 opt.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-
+                    ValidateLifetime = true,
 
                     ValidIssuer = configuration["Jwt:Issuer"],
                     ValidAudience = configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecurityKey"])),
-                    LifetimeValidator = (_, exp, token, _) => token is not null ? exp > DateTime.UtcNow : false
+                    LifetimeValidator = (_, expires, token, _) => token is not null ? expires > DateTime.UtcNow : false
                 };
+               
             });
 
             services.AddAuthorization();
+         
         }
     }   
 }

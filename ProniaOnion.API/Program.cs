@@ -3,6 +3,7 @@ using ProniaOnion.Application.ServiceRegistration;
 using ProniaOnion.Infrastructure.ServiceRegistration;
 using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
+using ProniaOnion.Persistence.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +52,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<AppDbContextInitializer>();
+    await initializer.InitializeDbAsync();
+    await initializer.CreateRolesAsync();
+    await initializer.CreateAdminAsync();
+
+
+}
+
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

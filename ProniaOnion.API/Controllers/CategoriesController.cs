@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProniaOnion.Application.Abstractions.Services;
 using ProniaOnion.Application.Dtos;
@@ -22,14 +23,12 @@ namespace ProniaOnion.API.Controllers
 
             return StatusCode(StatusCodes.Status201Created, await _service.CreateCategoryAsync(categoryDto));
         }
-
         [HttpGet]
         public async Task<IActionResult> GetAsync(int? page = null, int? limit = null)
         {
             if (page < 1 || limit < 1) return NotFound();
             return Ok(await _service.GetCategoriesAsync(page, limit));
         }
-
         [HttpGet("/api/[controller]/order")]
         public async Task<IActionResult> GetAsync(string sort, bool desc = false, int? page = null, int? limit = null)
         {

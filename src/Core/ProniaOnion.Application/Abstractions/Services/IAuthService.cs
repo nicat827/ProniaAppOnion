@@ -12,7 +12,12 @@ namespace ProniaOnion.Application.Abstractions.Services
     public interface IAuthService
     {
         Task Register(RegisterDto dto);
-        Task<ResponseTokenDto> Login(LoginDto dto);
+
+        Task<ResponseTokenDto> LoginAsync(LoginDto dto);
+
+        Task<ResponseTokenDto> RefreshTokensAsync(string refreshToken);
+
+        Task ConfirmEmailAsync(string token, string email);
 
         Task<IEnumerable<AppUserGetItemDto>> GetAllUsers(
             int? page = null,

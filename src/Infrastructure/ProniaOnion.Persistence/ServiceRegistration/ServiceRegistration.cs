@@ -38,6 +38,8 @@ namespace ProniaOnion.Persistence.ServiceRegistration
             services.AddScoped<IColorService, ColorService>();
             services.AddScoped<ITagService, TagService>();
             services.AddScoped<IAuthService, AuthService>();
+
+            services.AddScoped<AppDbContextInitializer>();
           
         }
     }

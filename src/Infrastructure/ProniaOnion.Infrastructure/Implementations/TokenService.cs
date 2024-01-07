@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ProniaOnion.Application.Abstractions.Services;
 using ProniaOnion.Application.Dtos.Token;
@@ -16,12 +17,13 @@ namespace ProniaOnion.Infrastructure.Implementations
     internal class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
-
-        public TokenService(IConfiguration configuration)
+        private readonly UserManager<AppUser> _userManager;
+        public TokenService(IConfiguration configuration, UserManager<AppUser> userManager)
         {
             _configuration = configuration;
+            _userManager = userManager;
         }
-        public ResponseTokenDto CreateToken(AppUser user, int minutes)
+        public async Task<ResponseTokenDto> GenerateTokensAsync(AppUser user, int minutes)
         {
             ICollection<Claim> claims = new List<Claim>
             {
@@ -30,6 +32,11 @@ namespace ProniaOnion.Infrastructure.Implementations
                 new Claim(ClaimTypes.GivenName, user.Name),
                 new Claim(ClaimTypes.Surname, user.Surname)
             };
+            ICollection<string> roles = await  _userManager.GetRolesAsync(user);
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecurityKey"]));
             SigningCredentials signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -43,7 +50,8 @@ namespace ProniaOnion.Infrastructure.Implementations
                     signingCredentials:signingCredentials
                 );
             JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
-            return new ResponseTokenDto(handler.WriteToken(token), token.ValidTo);
+            string refreshToken = Guid.NewGuid().ToString();
+            return new ResponseTokenDto(handler.WriteToken(token), token.ValidTo, refreshToken, token.ValidTo.AddMinutes(minutes/2));
         
         }
     }
